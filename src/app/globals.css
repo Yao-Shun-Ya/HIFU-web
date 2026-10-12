@@ -1,26 +1,629 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- Design tokens ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f4f7fb;
+  --bg-deep: #eaf0f7;
+  --surface: #ffffff;
+  --surface-2: #f0f4f9;
+  --fg: #0b1622;
+  --muted: #5b6b7d;
+  --line: rgba(11, 22, 34, 0.11);
+  --line-strong: rgba(11, 22, 34, 0.2);
+  --brand: #0d9488;
+  --brand-soft: rgba(13, 148, 136, 0.1);
+  --brand2: #0284c7;
+  --accent: #6d5ce7;
+  --low: #0f9d6a;
+  --mid: #c9860b;
+  --high: #d94a4a;
+  /* Hero 在浅色主题下是「浅色版」：深色文字 + 品牌色淡光晕 */
+  --hero-bg-1: #e8f1f9;
+  --hero-bg-2: #eff5fb;
+  --hero-bg-3: #f4f7fb;
+  --hero-glow-1: rgba(13, 148, 136, 0.18);
+  --hero-glow-2: rgba(2, 132, 199, 0.15);
+  --hero-glow-3: rgba(109, 92, 231, 0.1);
+  --hero-fg: #0b1622;
+  --hero-strong: #14263a;
+  --hero-muted: #4d6076;
+  --hero-faint: #6d7f93;
+  --hero-line: rgba(11, 22, 34, 0.13);
+  --hero-line-strong: rgba(11, 22, 34, 0.22);
+  --hero-chip: rgba(255, 255, 255, 0.66);
+  --hero-ink: #5b6b7d;
+  --hero-ink-soft: rgba(11, 22, 34, 0.3);
+  --hero-grid: rgba(11, 22, 34, 0.07);
+  --on-brand: #ffffff;
+  --shadow: 0 1px 2px rgba(11, 22, 34, 0.04), 0 12px 32px -12px rgba(11, 22, 34, 0.14);
+  --grid: rgba(11, 22, 34, 0.055);
+
+  /* 全站统一缓动曲线，避免各处硬编码 */
+  --e-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --e-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --e-soft: cubic-bezier(0.4, 0.14, 0.3, 1);
+
+}
+
+.dark {
+  --bg: #070c14;
+  --bg-deep: #04070d;
+  --surface: #0e1622;
+  --surface-2: #131e2c;
+  --fg: #e9f0f8;
+  --muted: #93a6bb;
+  --line: rgba(233, 240, 248, 0.12);
+  --line-strong: rgba(233, 240, 248, 0.24);
+  --brand: #2dd4bf;
+  --brand-soft: rgba(45, 212, 191, 0.12);
+  --brand2: #38bdf8;
+  --accent: #a78bfa;
+  --low: #34d399;
+  --mid: #fbbf24;
+  --high: #fb7185;
+  /* Hero 在深色主题下保持原来的深色版 */
+  --hero-bg-1: #05101c;
+  --hero-bg-2: #071420;
+  --hero-bg-3: #061019;
+  --hero-glow-1: rgba(13, 148, 136, 0.34);
+  --hero-glow-2: rgba(2, 132, 199, 0.3);
+  --hero-glow-3: rgba(109, 92, 231, 0.26);
+  --hero-fg: #eef4fb;
+  --hero-strong: #cfe0f0;
+  --hero-muted: #9fb3c8;
+  --hero-faint: #7f94a8;
+  --hero-line: rgba(255, 255, 255, 0.15);
+  --hero-line-strong: rgba(255, 255, 255, 0.2);
+  --hero-chip: rgba(255, 255, 255, 0.05);
+  --hero-ink: #9fb3c8;
+  --hero-ink-soft: rgba(159, 179, 200, 0.4);
+  --hero-grid: rgba(233, 240, 248, 0.06);
+  --on-brand: #04121a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+  --grid: rgba(233, 240, 248, 0.06);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand2: var(--brand2);
+  --color-accent: var(--accent);
+  --color-low: var(--low);
+  --color-mid: var(--mid);
+  --color-high: var(--high);
+  --color-on-brand: var(--on-brand);
+  --font-sans: var(--font-inter), "Inter", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 揭示动画的横向位移（left/right 变体）不应撑出横向滚动条 */
+main {
+  overflow-x: clip;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--brand) 30%, transparent);
+}
+
+/* 键盘可达性：统一焦点环 + 跳转链接 */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--on-brand);
+  font-size: 13px;
+  font-weight: 500;
+  transform: translateY(-180%);
+  transition: transform 0.25s var(--e-out);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+/* 服务端外壳里无法调用 useLocale 的文本：由 <html data-locale> 决定显示 */
+[data-locale="en"] .only-zh {
+  display: none;
+}
+html:not([data-locale="en"]) .only-en {
+  display: none;
+}
+
+
+/* ---------- Utilities ---------- */
+@utility surface {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+@utility grid-bg {
+  background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@utility glass {
+  background: color-mix(in oklab, var(--surface) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+.hero-mesh {
+  background:
+    radial-gradient(1100px 520px at 12% -10%, var(--hero-glow-1), transparent 60%),
+    radial-gradient(900px 480px at 88% 0%, var(--hero-glow-2), transparent 58%),
+    radial-gradient(700px 420px at 60% 110%, var(--hero-glow-3), transparent 60%),
+    linear-gradient(180deg, var(--hero-bg-1) 0%, var(--hero-bg-2) 55%, var(--hero-bg-3) 100%);
+  color: var(--hero-fg);
+}
+
+@utility hero-grid {
+  background-image: linear-gradient(to right, var(--hero-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--hero-grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.card-hover {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s, border-color 0.35s;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in oklab, var(--brand) 45%, var(--line));
+  box-shadow: 0 1px 2px rgba(11, 22, 34, 0.05), 0 22px 48px -20px color-mix(in oklab, var(--brand) 35%, transparent);
+}
+
+.hairline {
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+}
+
+/* range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 26px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand) var(--pct, 50%), color-mix(in oklab, var(--fg) 12%, transparent) var(--pct, 50%));
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  margin-top: -7px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--brand);
+  box-shadow: 0 2px 10px color-mix(in oklab, var(--brand) 45%, transparent);
+  transition: transform 0.15s;
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--fg) 12%, transparent);
+}
+input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--brand);
+}
+input[type="range"]::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--brand);
+}
+
+/* animations */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@keyframes dash {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(400%); }
+}
+.animate-floaty { animation: floaty 7s ease-in-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 3.4s ease-in-out infinite; }
+
+/* ---------- 交互与氛围（展示级动效） ---------- */
+
+/* 主按钮的光扫 */
+@utility sheen {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 34%, rgba(255, 255, 255, 0.45) 50%, transparent 66%);
+    transform: translateX(-115%);
+    transition: transform 0.9s var(--e-out);
+  }
+  &:hover::after {
+    transform: translateX(115%);
+  }
+}
+
+/* 卡片跟随指针的光斑 + 描边辉光（JS 写入 --mx / --my） */
+@utility spot {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.45s var(--e-out);
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--brand) 12%, transparent),
+      transparent 62%
+    );
+  }
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.45s var(--e-out);
+    background: radial-gradient(
+      280px circle at var(--mx, 50%) var(--my, 0%),
+      color-mix(in oklab, var(--brand) 78%, transparent),
+      transparent 66%
+    );
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  &:hover::after,
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+/* 轻微 3D 姿态（JS 写入 --rx / --ry / --tx / --ty） */
+@utility tilt {
+  transform: perspective(1400px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+    translate3d(var(--tx, 0px), var(--ty, 0px), 0);
+  transition: transform 0.6s var(--e-out);
+  will-change: transform;
+}
+
+/* 胶片颗粒：给纯色大面积加质感 */
+@utility grain-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.dark .grain-layer {
+  opacity: 0.075;
+}
+
+/* 顶部滚动进度 */
+@utility scroll-bar {
+  transform: scaleX(var(--sp, 0));
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* 光晕缓慢漂移 */
+@utility drift-a {
+  animation: drift-a 30s var(--e-inout) infinite alternate;
+}
+@utility drift-b {
+  animation: drift-b 38s var(--e-inout) infinite alternate;
+}
+
+/* 数值变化时标记平滑滑动（列线图导引线与概率标记） */
+.glide {
+  transition: transform 0.6s var(--e-out);
+}
+
+/* 声束能量流动 */
+.beam-flow {
+  stroke-dasharray: 5 13;
+  animation: beam 2.8s linear infinite;
+}
+
+/* 焦点处扩散的消融热环 */
+.focus-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: focus-ring 3.4s var(--e-out) infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* 标题逐行揭幕 */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.line-mask > span {
+  display: block;
+  animation: line-rise 1s var(--e-out) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* 路由切换的入场 */
+.page-in {
+  /* backwards 而非 both：动画结束后 transform 回到 none，
+     避免残留的 identity transform 让内部 position:fixed 失去视口参照 */
+  animation: page-in 0.5s var(--e-out) backwards;
+}
+
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(5%, 4%, 0) scale(1.1); }
+}
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.06); }
+  to { transform: translate3d(-6%, -3%, 0) scale(1); }
+}
+@keyframes beam {
+  to { stroke-dashoffset: -36; }
+}
+@keyframes focus-ring {
+  0% { transform: scale(0.45); opacity: 0.5; }
+  60% { opacity: 0; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes line-rise {
+  from { transform: translateY(120%); }
+  to { transform: none; }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+
+@media print {
+  .no-print { display: none !important; }
+  .grain-layer { display: none !important; }
+  .spot::after, .spot::before { display: none !important; }
+  .surface { box-shadow: none; }
+}
+
+/* ---------- 纯 CSS 揭示动画（不依赖 JS 动画帧） ---------- */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes grow-x {
+  from {
+    width: 0;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.75s var(--e-out),
+    transform 0.85s var(--e-out),
+    filter 0.75s linear,
+    clip-path 0.95s var(--e-out);
+}
+@utility reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* 揭示变体：方向 / 缩放 / 模糊 / 线性遮罩（Reveal 组件的 variant）
+   用 :where() 保持 0 特异性，让 .reveal-in 始终能覆盖初始态 */
+.reveal:where([data-v="left"]) {
+  transform: translateX(-26px);
+}
+.reveal:where([data-v="right"]) {
+  transform: translateX(26px);
+}
+.reveal:where([data-v="scale"]) {
+  transform: scale(0.955);
+}
+.reveal:where([data-v="blur"]) {
+  filter: blur(10px);
+  transform: translateY(14px);
+}
+.reveal:where([data-v="mask"]) {
+  clip-path: inset(0 0 100% 0);
+  transform: translateY(12px);
+}
+.reveal-in:where([data-v="blur"]) {
+  filter: none;
+}
+.reveal-in:where([data-v="mask"]) {
+  clip-path: inset(-40% -40% -40% -40%);
+}
+
+@utility rise {
+  animation: rise-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+@utility fade {
+  animation: fade-in 0.9s ease-out both;
+  animation-delay: var(--d, 0s);
+}
+@utility draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-line 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+@utility grow {
+  animation: grow-x 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+@utility pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+@utility slide {
+  animation: slide-left 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-in {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .rise,
+  .fade,
+  .grow,
+  .pop,
+  .slide {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .draw {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .animate-floaty,
+  .animate-pulse-soft,
+  .beam-flow,
+  .drift-a,
+  .drift-b,
+  .page-in,
+  .focus-ring,
+  .line-mask > span {
+    animation: none !important;
+  }
+  .focus-ring {
+    display: none !important;
+  }
+  .line-mask > span {
+    transform: none !important;
+  }
+  .reveal {
+    filter: none !important;
+    clip-path: none !important;
+  }
+  .tilt {
+    transform: none !important;
+  }
+  .glide {
+    transition: none !important;
+  }
+  .spot::after,
+  .spot::before {
+    opacity: 0 !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }

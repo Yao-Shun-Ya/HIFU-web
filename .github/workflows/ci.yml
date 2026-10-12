@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npx eslint "src/**/*.{ts,tsx}"
+
+      - name: Build (all routes must stay static)
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL }}
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run build
+
+      - name: Smoke test
+        run: |
+          npm run start -- -p 3127 &
+          for i in $(seq 1 30); do
+            sleep 2
+            curl -sf -o /dev/null http://localhost:3127/ && break
+          done
+          fail=0
+          for r in / /overview /results /methods /about /assessment /robots.txt /sitemap.xml /icon.svg; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:3127$r")
+            echo "$r -> $code"
+            [ "$code" = "200" ] || fail=1
+          done
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3127/definitely-not-a-page)
+          echo "/definitely-not-a-page -> $code"
+          [ "$code" = "404" ] || fail=1
+          exit $fail
