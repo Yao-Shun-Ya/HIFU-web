@@ -724,6 +724,7 @@ export async function attach(port = 9344) {
 | 深色下阴影看不见 | 阴影色写死为黑色低透明度 | 用 `color-mix(in oklab, var(--fg) X%, transparent)` 让阴影随主题翻转 |
 | 构建后 HTML 每次都变 | 服务端组件里用了 `new Date()` / `Math.random()` | 常量或构建期固定值 |
 | 分享图没有中文 | Satori 不带中文字体 | 内置字体文件并传 `fonts`，或分享图用英文 |
+| CI 里 `Cannot find name LayoutProps`（本地却不报） | `next-env.d.ts` 与 `.next/types/` 被忽略，全局类型缺失 | 先 `npm run build` 再 `npx tsc --noEmit`（见第 17 节） |
 | `npm run dev` 下 CSS 不生效 | Tailwind 加载器没挂到 Turbopack 规则 | 检查 `next.config.ts` 的 `turbopack.rules` |
 
 ---
@@ -865,9 +866,13 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: npm }
       - run: npm ci
+
+      # 顺序很重要：next-env.d.ts 被 .gitignore 忽略，而它引用的
+      # .next/types/*.d.ts 只有 build 之后才存在（LayoutProps 等全局类型来自那里）。
+      # 先 build（Next 自身会在构建期做类型检查），再跑独立 tsc / eslint。
+      - run: npm run build
       - run: npx tsc --noEmit
       - run: npx eslint "src/**/*.{ts,tsx}"
-      - run: npm run build
       - name: 冒烟测试（全站应静态且无溢出）
         run: |
           npm run start -p 3127 &

@@ -21,17 +21,20 @@ jobs:
 
       - run: npm ci
 
-      - name: Typecheck
-        run: npx tsc --noEmit
-
-      - name: Lint
-        run: npx eslint "src/**/*.{ts,tsx}"
-
+      # 顺序很重要：next-env.d.ts 被 .gitignore 忽略，它引用的 .next/types/*.d.ts
+      # 只有在 build 之后才存在（LayoutProps 等全局类型来自这里）。
+      # 因此先 build（Next 自身会在构建期做类型检查），再跑独立的 tsc / eslint。
       - name: Build (all routes must stay static)
         env:
           NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL }}
           NEXT_TELEMETRY_DISABLED: "1"
         run: npm run build
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npx eslint "src/**/*.{ts,tsx}"
 
       - name: Smoke test
         run: |
