@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://hifuweb.example.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://hifuweb.example.com"),
   title: {
     default: `${SITE.title} · 成果展示`,
     template: `%s · ${SITE.shortTitleEn}`,

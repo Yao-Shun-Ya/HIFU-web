@@ -737,6 +737,7 @@ export async function attach(port = 9344) {
 | `NEXT_PUBLIC_SITE_URL` | canonical / OG / robots / sitemap 的基址 | `layout.tsx`、`robots.ts`、`sitemap.ts` |
 
 > `NEXT_PUBLIC_` 前缀意味着它会被**内联进客户端 bundle**，因此**必须在构建时**提供，
+> 代码里用 `||` 而不是 `??` 取默认值：CI 里未配置该变量时它可能是**空字符串**，`??` 不会兜底，`new URL("")` 会直接让构建失败。
 > 运行时改无效。换域名 = 改变量 + 重新构建。
 
 ### 16.2 方案 A：Vercel（零配置）
